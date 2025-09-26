@@ -1,0 +1,14 @@
+body {
+    background-color: #202123;
+    color: whitesmoke;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+button {
+    height: 50px;
+    width: 50px;
+}
