@@ -49,6 +49,8 @@ const state = {
     justEvaluated: false,
 };
 
+const decimalBtn = document.querySelector('[data-decimal]');
+
 function updateDisplay() {
     const display = document.querySelector('#display');
     display.textContent = state.current;
@@ -82,6 +84,7 @@ function setupUI() {
 
             const action = btn.getAttribute('data-action');
             if (action==="clear") handleClear();
+            if (action === 'backspace') handleBackspace();
             if (action==='sign') handleSign();
             if (action==='percent') handlePercent();
             if (action==='equals') handleEquals();
@@ -102,6 +105,8 @@ function handleDecimal() {
     else state.current += '.';
     
     updateDisplay();
+
+    if (decimalBtn) decimalBtn.disabled = true;
 }
 
 function handleClear() {
@@ -110,7 +115,9 @@ function handleClear() {
     state.operator = null;
     state.awaitingRhs = false;
     state.justEvaluated = false;
+
     updateDisplay();
+    if (decimalBtn) decimalBtn.disabled = false;
 }
 
 function handleSign() {
@@ -141,6 +148,7 @@ function handleOperator(op) {
         state.awaitingRhs = true;
         state.justEvaluated = false;
         state.current = '0';
+        if (decimalBtn) decimalBtn.disabled = false;
         return;
     }
     else if (state.awaitingRhs) {
@@ -150,13 +158,14 @@ function handleOperator(op) {
 
     try {
         const result = operate(state.operator, state.lhs, rhs);
-        state.lhs = result;
+        state.lhs = Number(formatNumber(result));
         state.operator = op;
         state.awaitingRhs = true;
-        state.current = ''
+        state.current = '0'
 
         const display = document.querySelector('#display');
-        if (display) display.textContent = String(result);
+        if (display) display.textContent = formatNumber(result);
+        if (decimalBtn) decimalBtn.disabled = false;
     } catch (error) {
         state.current = 'Error';
         state.lhs = null;
@@ -166,6 +175,7 @@ function handleOperator(op) {
 
         const display = document.querySelector('#display');
         if (display) display.textContent = 'Error';
+        if (decimalBtn) decimalBtn.disabled = false;
     }
 }
 
@@ -185,12 +195,13 @@ function handleEquals() {
     const rhs = Number(state.current);
     try {
         const result = operate(state.operator, state.lhs, rhs);
-        state.current = String(result);
+        state.current = formatNumber(result);
         state.lhs = null;
         state.operator = null;
         state.awaitingRhs = false;
         state.justEvaluated = true;
         updateDisplay();
+        if (decimalBtn) decimalBtn.disabled = state.current.includes('.');
     } catch (error) {
         state.current = 'Error';
         state.lhs = null;
@@ -198,6 +209,7 @@ function handleEquals() {
         state.awaitingRhs = false;
         state.justEvaluated = true;
         updateDisplay();
+        if (decimalBtn) decimalBtn.disabled = false;
     }
 }
 
@@ -210,14 +222,58 @@ function handleBackspace() {
     }
 
     updateDisplay();
+
+    if (decimalBtn && !state.current.includes('.')) {
+        decimalBtn.disabled = false;
+    }
 }
 
-window.addEventListener('keydown', (e)=>{
-    if (e.key==='Backspace') {
-        e.preventDefault();
-        handleBackspace();
+window.addEventListener('keydown', (e) => {
+    const k = e.key;
+
+    // digits 0–9
+    if (k >= '0' && k <= '9') { handleDigit(k); return; }
+
+    // decimal
+    if (k === '.') {
+    if (!decimalBtn || !decimalBtn.disabled) handleDecimal();
+    return;
     }
+
+    // operators
+    if (k === '+' || k === '-' || k === '*' || k === '/') {
+    const opMap = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    handleOperator(opMap[k]);
+    return;
+    }
+
+    // equals / enter
+    if (k === 'Enter' || k === '=') { handleEquals(); return; }
+
+    // clear
+    if (k === 'Escape') { handleClear(); return; }
+
+    // backspace (prevent browser nav)
+    if (k === 'Backspace') { e.preventDefault(); handleBackspace(); return; }
 });
+
+function formatNumber(n) {
+    if (!Number.isFinite(n)) return 'Error';
+
+    const abs = Math.abs(n);
+    const useExp = (abs !== 0 && (abs >= 1e12 || abs < 1e-9));
+
+    const sig = 12;
+    let s = useExp ? Number(n).toExponential(sig - 1) : Number(n.toPrecision(sig)).toString();
+
+    if (!useExp && s.includes('.')) {
+        s = s.replace(/\.?0+$/, '');
+    }
+
+    if (s === '-0') s = '0';
+    return s;
+}
+
 
 
 window.Calc = { add, subtract, multiply, divide, operate };

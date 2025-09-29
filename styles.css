@@ -1,14 +1,126 @@
-body {
-    background-color: #202123;
-    color: whitesmoke;
+/* ===== Theme & Base ===== */
+:root{
+  --bg:#0f1115;
+  --panel:#171a20;
+  --key:#222733;
+  --key-operator:#2c3446;
+  --key-accent:#4c84ff;
+  --text:#e9eef7;
+  --muted:#9aa3b2;
+  --danger:#ff6b6b;
+  --ring:#7aa2ff;
 }
 
-.button-row {
-    display: flex;
-    flex-wrap: wrap;
+*{ box-sizing:border-box; }
+
+html,body{ height:100%; }
+body{
+  margin:0;
+  display:grid;
+  place-items:center;
+  background: radial-gradient(1000px 800px at 50% -200px, #1b2230 0, var(--bg) 55%);
+  color:var(--text);
+  font: 500 16px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
 }
 
-button {
-    height: 50px;
-    width: 50px;
+/* ===== Calculator Card ===== */
+.calculator{
+  width:min(92vw, 460px);
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+/* ===== Display Area ===== */
+.view-area{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.display,
+#display{
+  flex:1;
+  height:80px;
+  padding:12px 16px;
+  border-radius:12px;
+  background:linear-gradient(180deg, #0c1018, #0a0e15);
+  color:var(--text);
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(32px, 7vw, 48px);
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+/* Optional: a dedicated backspace button beside the display if you have #backspace there */
+#backspace{
+  min-width:56px;
+  height:56px;
+  border:none;
+  border-radius:12px;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+}
+#backspace:hover{ color:var(--text); }
+#backspace:active{ transform:translateY(1px); }
+#backspace:focus-visible{ outline:2px solid var(--ring); outline-offset:2px; }
+
+/* ===== Button Rows (Flex) ===== */
+.button-row{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.button-row > button{
+  flex:1;
+  height:68px;
+  border:none;
+  border-radius:14px;
+  background:var(--key);
+  color:var(--text);
+  cursor:pointer;
+  user-select:none;
+  transition: transform .05s ease, background .15s ease, box-shadow .15s ease, filter .15s ease;
+  box-shadow: inset 0 -2px 0 rgba(255,255,255,.04), 0 2px 10px rgba(0,0,0,.25);
+  font-size:20px;
+}
+
+/* Hover / Active / Focus */
+.button-row > button:hover{ filter:brightness(1.06); }
+.button-row > button:active{ transform: translateY(1px); }
+.button-row > button:focus-visible{ outline:2px solid var(--ring); outline-offset:2px; }
+
+/* Variants by role (using your data-attrs) */
+.button-row > button[data-op]{ background:var(--key-operator); }
+.button-row > button[data-action="equals"]{ background:var(--key-accent); color:#fff; font-weight:700; }
+.button-row > button[data-action="clear"]{
+  background:linear-gradient(180deg, #3a2b2b, #2a1f1f);
+}
+.button-row > button[data-action="percent"],
+.button-row > button[data-action="sign"]{
+  color:var(--muted);
+}
+
+/* Disabled buttons (e.g., parentheses, decimal lock) */
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+/* ===== Small screens tweaks ===== */
+@media (max-width: 360px){
+  .button-row > button{ height:52px; font-size:17px; }
+  .display, #display{ height:64px; }
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce){
+  .button-row > button{ transition:none; }
 }

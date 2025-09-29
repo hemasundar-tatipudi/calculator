@@ -8,12 +8,16 @@
 </head>
 <body>
     <main class="calculator" role="application" aria-label="Calculator">
-        <output class="display" id="display" aria-live="polite" aria-atomic="true">0</output>
+
+        <div class="view-area">
+            <output class="display" id="display" aria-live="polite" aria-atomic="true">0</output>
+            <button data-action="backspace" id="backspace">⌫</button>
+        </div>
 
         <div>
             <div class="button-row">
                 <button data-action="clear">C</button>
-                <button>()</button>
+                <button disabled>()</button>
                 <button data-action="percent">%</button>
                 <button data-op="÷">÷</button>
             </div>
